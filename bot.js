@@ -81,3 +81,43 @@ const USDC_ABI = [
     stateMutability: 'nonpayable',
   },
 ];
+
+// Constant setting
+const contractAddress = '0x5FbE74A283f7954f10AA04C2eDf55578811aeb03';
+const USDC_ADDRESS = '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238';
+const graphqlEndpoint = 'https://graphql.union.build/v1/graphql';
+const baseExplorerUrl = 'https://sepolia.etherscan.io';
+const unionUrl = 'https://app.union.build/explorer';
+const telegramLink = 'https://t.me/airdrop_node';
+
+const rpcProviders = [new JsonRpcProvider('https://eth-sepolia.public.blastapi.io')];
+let currentRpcProviderIndex = 0;
+
+function provider() {
+  return rpcProviders[currentRpcProviderIndex];
+}
+
+function rotateRpcProvider() {
+  currentRpcProviderIndex = (currentRpcProviderIndex + 1) % rpcProviders.length;
+  return provider();
+}
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+function askQuestion(query) {
+  return new Promise(resolve => rl.question(query, resolve));
+}
+
+const explorer = {
+  tx: (txHash) => `${baseExplorerUrl}/tx/${txHash}`,
+  address: (address) => `${baseExplorerUrl}/address/${address}`,
+};
+
+const union = {
+  tx: (txHash) => `${unionUrl}/transfers/${txHash}`,
+};
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
