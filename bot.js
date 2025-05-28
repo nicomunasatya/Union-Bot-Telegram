@@ -48,3 +48,36 @@ const UCS03_ABI = [
     type: 'function',
   },
 ];
+
+const USDC_ABI = [
+  {
+    constant: true,
+    inputs: [{ name: 'account', type: 'address' }],
+    name: 'balanceOf',
+    outputs: [{ name: '', type: 'uint256' }],
+    type: 'function',
+    stateMutability: 'view',
+  },
+  {
+    constant: true,
+    inputs: [
+      { name: 'owner', type: 'address' },
+      { name: 'spender', type: 'address' },
+    ],
+    name: 'allowance',
+    outputs: [{ name: '', type: 'uint256' }],
+    type: 'function',
+    stateMutability: 'view',
+  },
+  {
+    constant: false,
+    inputs: [
+      { name: 'spender', type: 'address' },
+      { name: 'value', type: 'uint256' },
+    ],
+    name: 'approve',
+    outputs: [{ name: '', type: 'bool' }],
+    type: 'function',
+    stateMutability: 'nonpayable',
+  },
+];
