@@ -17,7 +17,7 @@ const logger = {
   step: (msg) => console.log(`[➤] ${msg}`),
   banner: () => {
     console.log(`---------------------------------------------`);
-    console.log(`  Union Testnet Auto Bot - Script by airdropnode (https://t.me/airdrop_node)  `);
+    console.log(`  Union Testnet Auto Bot - Script by Nico Munasatya  `);
     console.log(`---------------------------------------------`);
     console.log();
   }
