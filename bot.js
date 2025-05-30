@@ -154,4 +154,13 @@ function loadWallets() {
   }
 }
 
+// Function to save wallet to file
+function saveWallets(wallets) {
+  try {
+    fs.writeFileSync(WALLET_FILE, JSON.stringify(wallets, null, 2));
+    logger.success('Dompet disimpan ke wallets.json');
+  } catch (err) {
+    logger.error(`Gagal menyimpan dompet: ${err.message}`);
+  }
+}
 
