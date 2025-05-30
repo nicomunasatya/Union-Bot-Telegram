@@ -189,3 +189,43 @@ async function checkBalanceAndApprove(wallet, usdcAddress, spenderAddress) {
   }
   return true;
 }
+
+// Function to retrieve packet hash
+async function pollPacketHash(txHash, retries = 50, intervalMs = 5000) {
+  const headers = {
+    accept: 'application/graphql-response+json, application/json',
+    'accept-encoding': 'gzip, deflate, br, zstd',
+    'accept-language': 'en-US,en;q=0.9,id;q=0.8',
+    'content-type': 'application/json',
+    origin: 'https://app-union.build',
+    referer: 'https://app.union.build/',
+    'user-agent': 'Mozilla/5.0',
+  };
+  const data = {
+    query: `
+      query ($submission_tx_hash: String!) {
+        v2_transfers(args: {p_transaction_hash: $submission_tx_hash}) {
+          packet_hash
+        }
+      }
+    `,
+    variables: {
+      submission_tx_hash: txHash.startsWith('0x') ? txHash : `0x${txHash}`,
+    },
+  };
+
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await axios.post(graphqlEndpoint, data, { headers });
+      const result = res.data?.data?.v2_transfers;
+      if (result && result.length > 0 && result[0].packet_hash) {
+        return result[0].packet_hash;
+      }
+    } catch (e) {
+      logger.error(`Kesalahan paket: ${e.message}`);
+    }
+    await delay(intervalMs);
+  }
+  logger.warn(`Tidak ada hash paket ditemukan setelah ${retries} percobaan.`);
+  return null;
+}
