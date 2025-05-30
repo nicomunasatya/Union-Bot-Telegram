@@ -121,3 +121,19 @@ const union = {
 };
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Function to generate a random time between 30 seconds (30,000 ms) and 120 seconds (120,000 ms)
+function getRandomDelay() {
+  const min = 30000; // 30 detik
+  const max = 120000; // 120 detik
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function timelog() {
+  return moment().tz('Asia/Jakarta').format('HH:mm:ss | DD-MM-YYYY');
+}
+
+function header() {
+  process.stdout.write('\x1Bc');
+  logger.banner();
+}
