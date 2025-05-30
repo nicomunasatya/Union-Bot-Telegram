@@ -137,3 +137,21 @@ function header() {
   process.stdout.write('\x1Bc');
   logger.banner();
 }
+
+// File path to save the wallet
+const WALLET_FILE = path.join(__dirname, 'wallets.json');
+
+// Function to load wallet from file
+function loadWallets() {
+  try {
+    if (fs.existsSync(WALLET_FILE)) {
+      return JSON.parse(fs.readFileSync(WALLET_FILE, 'utf8'));
+    }
+    return [];
+  } catch (err) {
+    logger.error(`Gagal memuat dompet: ${err.message}`);
+    return [];
+  }
+}
+
+
