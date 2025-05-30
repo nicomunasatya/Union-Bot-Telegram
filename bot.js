@@ -164,3 +164,28 @@ function saveWallets(wallets) {
   }
 }
 
+// Function to check balance and approve USDC
+async function checkBalanceAndApprove(wallet, usdcAddress, spenderAddress) {
+  const usdcContract = new ethers.Contract(usdcAddress, USDC_ABI, wallet);
+  const balance = await usdcContract.balanceOf(wallet.address);
+  if (balance === 0n) {
+    logger.error(`${wallet.address} tidak memiliki cukup USDC. Isi dompet Anda terlebih dahulu!`);
+    return false;
+  }
+
+  const allowance = await usdcContract.allowance(wallet.address, spenderAddress);
+  if (allowance === 0n) {
+    logger.loading(`USDC belum disetujui. Mengirim transaksi persetujuan...`);
+    const approveAmount = ethers.MaxUint256;
+    try {
+      const tx = await usdcContract.approve(spenderAddress, approveAmount);
+      const receipt = await tx.wait();
+      logger.success(`Persetujuan dikonfirmasi: ${explorer.tx(receipt.hash)}`);
+      await delay(3000);
+    } catch (err) {
+      logger.error(`Persetujuan gagal: ${err.message}`);
+      return false;
+    }
+  }
+  return true;
+}
