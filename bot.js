@@ -310,3 +310,96 @@ async function sendFromWallet(walletInfo, maxTransaction, destination, telegramB
     }
   }
 }
+
+// Main function for console mode
+async function mainConsole() {
+  header();
+
+  let wallets = loadWallets();
+  if (wallets.length === 0) {
+    wallets = [];
+    let index = 1;
+    while (true) {
+      const privateKey = process.env[`PRIVATE_KEY_${index}`]; // Using privateKey (capital letters)
+      const babylonAddress = process.env[`BABYLON_ADDRESS_${index}`];
+      if (!privateKey) break;
+      wallets.push({
+        name: `Dompet${index}`,
+        privateKey: privateKey, // Using privateKey (capital letters)
+        babylonAddress: babylonAddress || ''
+      });
+      index++;
+    }
+    saveWallets(wallets);
+  }
+
+  if (wallets.length === 0) {
+    logger.error(`No wallets found in .env or wallets.json. Please provide at least one PRIVATE_KEY_X.`);
+    rl.close();
+    process.exit(1);
+  }
+
+  while (true) {
+    console.log(`Menu (Script by airdropnode - ${telegramLink}):`);
+    console.log(`1. Sepolia - Holesky`);
+    console.log(`2. Sepolia - Babylon`);
+    console.log(`3. Random (Holesky dan Babylon)`);
+    console.log(`4. Keluar`);
+    const menuChoice = await askQuestion(`[?] Select a menu option (1-4): `);
+    const choice = parseInt(menuChoice.trim());
+
+    if (choice === 4) {
+      logger.info(`Exit the program.`);
+      rl.close();
+      process.exit(0);
+    }
+
+    if (![1, 2, 3].includes(choice)) {
+      logger.error(`Invalid option. Please select 1, 2, 3, or 4.`);
+      continue;
+    }
+
+    const maxTransactionInput = await askQuestion(`[?] Enter the number of transactions per wallet: `);
+    const maxTransaction = parseInt(maxTransactionInput.trim());
+
+    if (isNaN(maxTransaction) || maxTransaction <= 0) {
+      logger.error(`Invalid number. Please enter a positive number.`);
+      continue;
+    }
+
+    for (const walletInfo of wallets) {
+      if (!walletInfo.privateKey) { // Menggunakan privateKey (huruf kapital)
+        logger.warn(`Passing the wallet '${walletInfo.name}': The private key is missing.`);
+        continue;
+      }
+      if (!walletInfo.privateKey.startsWith('0x')) { // Menggunakan privateKey (huruf kapital)
+        logger.warn(`Passing the wallet '${walletInfo.name}': The private key must start with '0x'.`);
+        continue;
+      }
+      if (!/^(0x)[0-9a-fA-F]{64}$/.test(walletInfo.privateKey)) { // Menggunakan privateKey (huruf kapital)
+        logger.warn(`Passing the wallet '${walletInfo.name}': The private key is not a valid 64 character hexadecimal string.`);
+        continue;
+      }
+
+      if (choice === 1) {
+        await sendFromWallet(walletInfo, maxTransaction, 'holesky');
+      } else if (choice === 2) {
+        await sendFromWallet(walletInfo, maxTransaction, 'babylon');
+      } else if (choice === 3) {
+        const destinations = ['holesky', 'babylon'].filter(dest => dest !== 'babylon' || walletInfo.babylonAddress);
+        if (destinations.length === 0) {
+          logger.warn(`Passing the wallet '${walletInfo.name}': There are no valid destinations (Babylon address does not exist).`);
+          continue;
+        }
+        for (let i = 0; i < maxTransaction; i++) {
+          const randomDest = destinations[Math.floor(Math.random() * destinations.length)];
+          await sendFromWallet(walletInfo, 1, randomDest);
+        }
+      }
+    }
+
+    if (wallets.length === 0) {
+      logger.warn(`No wallet processing. Check .env or wallets.json for valid entries.`);
+    }
+  }
+}
