@@ -226,6 +226,32 @@ async function pollPacketHash(txHash, retries = 50, intervalMs = 5000) {
     }
     await delay(intervalMs);
   }
-  logger.warn(`Tidak ada hash paket ditemukan setelah ${retries} percobaan.`);
+  logger.warn(`No package hash found after ${retries} test.`);
   return null;
 }
+
+// Function to send transactions from wallet
+async function sendFromWallet(walletInfo, maxTransaction, destination, telegramBot = null, chatId = null) {
+  const wallet = new Wallet(walletInfo.privateKey, provider()); // Menggunakan Wallet dari ethers
+  let recipientAddress, destinationName, channelId, operand;
+
+  if (destination === 'babylon') {
+    recipientAddress = walletInfo.babylonAddress;
+    destinationName = 'Babylon';
+    channelId = 7;
+    if (!recipientAddress) {
+      const logMsg = `Melewati dompet '${walletInfo.name || 'Tanpa Nama'}': Alamat Babylon tidak ada.`; // Ganti nama variabel
+      logger.warn(logMsg);
+      if (telegramBot && chatId) telegramBot.sendMessage(chatId, logMsg);
+      return;
+    }
+  } else if (destination === 'holesky') {
+    recipientAddress = wallet.address;
+    destinationName = 'Holesky';
+    channelId = 8;
+  } else {
+    const logMsg = `Tujuan tidak valid: ${destination}`; // Ganti nama variabel
+    logger.error(logMsg);
+    if (telegramBot && chatId) telegramBot.sendMessage(chatId, logMsg);
+    return;
+  }
