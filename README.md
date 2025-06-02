@@ -39,3 +39,10 @@ npm -v
 ```bash
 sudo apt install npm
 ```
+
+## 6. Initialization and Installation of Dependencies
+
+```bash
+npm init -y
+npm install ethers axios moment-timezone readline node-telegram-bot-api dotenv
+```
