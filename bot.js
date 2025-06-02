@@ -430,4 +430,11 @@ function mainTelegram() {
     },
   };
 
-  
+  // Return to home button
+  const backToHomeButton = [{ text: 'Return to Home', callback_data: 'home' }];
+
+  // Function to display the main menu
+  function showMainMenu(chatId, message = `Welcome to Union Testnet Auto Bot! (Select option:`) {
+    delete userState[chatId]; // Delete user state
+    bot.sendMessage(chatId, message, mainMenu);
+  }
