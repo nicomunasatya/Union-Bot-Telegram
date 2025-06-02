@@ -17,3 +17,19 @@ cd Union
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 source ~/.bashrc
 ```
+
+## 3. Install Node.js Version 20
+
+```bash
+nvm install 20
+nvm alias default 20
+```
+
+---
+
+## 4. Installation Verification
+
+```bash
+node -v
+npm -v
+```
