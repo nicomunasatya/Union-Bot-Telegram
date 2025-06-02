@@ -58,5 +58,5 @@ npm install ethers axios moment-timezone readline node-telegram-bot-api dotenv
 
 ```
 Use this token to access the HTTP API:
-123456789:AAH4YQ8z-example-token-dari-botfather
+123456789:AAH4YQ8z-example-token-from-botfather
 ```
