@@ -33,3 +33,9 @@ nvm alias default 20
 node -v
 npm -v
 ```
+
+## 5. Install npm (if not available yet)
+
+```bash
+sudo apt install npm
+```
