@@ -403,3 +403,31 @@ async function mainConsole() {
     }
   }
 }
+
+// Main functions for Telegram mode
+function mainTelegram() {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const allowedChatId = process.env.TELEGRAM_CHAT_ID;
+
+  if (!token || !allowedChatId) {
+    logger.warn('Telegram bot is not configured: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not found in .env. Starts in console mode.');
+    return mainConsole();
+  }
+
+  const bot = new TelegramBot(token, { polling: true });
+  const userState = {}; // To store user status
+
+  // Tombol menu utama
+  const mainMenu = {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: 'Add Wallet', callback_data: 'add_wallet' }],
+        [{ text: 'Wallet List', callback_data: 'list_wallets' }],
+        [{ text: 'Execute Transaction', callback_data: 'run_transactions' }],
+        [{ text: 'Help', callback_data: 'help' }],
+        [{ text: 'Join Telegram (airdropnode)', url: telegramLink }],
+      ],
+    },
+  };
+
+  
