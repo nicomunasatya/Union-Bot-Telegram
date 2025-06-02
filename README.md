@@ -46,3 +46,7 @@ sudo apt install npm
 npm init -y
 npm install ethers axios moment-timezone readline node-telegram-bot-api dotenv
 ```
+
+## 7. Create Bot and Get Token from BotFather
+
+1. Open Telegram.
