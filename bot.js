@@ -438,3 +438,13 @@ function mainTelegram() {
     delete userState[chatId]; // Delete user state
     bot.sendMessage(chatId, message, mainMenu);
   }
+
+// Handles the /start command
+  bot.onText(/\/start/, (msg) => {
+    const chatId = msg.chat.id.toString();
+    if (chatId !== allowedChatId) {
+      bot.sendMessage(chatId, 'Access is not permitted.');
+      return;
+    }
+    showMainMenu(chatId);
+  });
