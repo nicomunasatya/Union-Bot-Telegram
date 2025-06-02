@@ -51,3 +51,4 @@ npm install ethers axios moment-timezone readline node-telegram-bot-api dotenv
 
 1. Open Telegram.
 2. Search and start chatting with [@BotFather](https://t.me/BotFather).
+3. Type `/start` then type `/newbot`.
