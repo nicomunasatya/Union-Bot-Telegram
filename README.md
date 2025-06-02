@@ -55,3 +55,8 @@ npm install ethers axios moment-timezone readline node-telegram-bot-api dotenv
 4. Enter bot name (free).
 5. Enter a bot username that ends with `bot` (example: `unionnotifier_bot`).
 6. Once successful, BotFather will provide a **TOKEN**, for example:
+
+```
+Use this token to access the HTTP API:
+123456789:AAH4YQ8z-example-token-dari-botfather
+```
