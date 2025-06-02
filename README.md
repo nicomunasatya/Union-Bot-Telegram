@@ -53,3 +53,4 @@ npm install ethers axios moment-timezone readline node-telegram-bot-api dotenv
 2. Search and start chatting with [@BotFather](https://t.me/BotFather).
 3. Type `/start` then type `/newbot`.
 4. Enter bot name (free).
+5. Enter a bot username that ends with `bot` (example: `unionnotifier_bot`).
