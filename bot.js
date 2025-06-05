@@ -461,19 +461,19 @@ function mainTelegram() {
     const data = query.data;
     bot.answerCallbackQuery(query.id);
 
-    // Kembali ke menu utama
+    // Back to main menu
     if (data === 'home') {
       showMainMenu(chatId, 'Kembali ke menu utama.');
       return;
     }
 
-    // Menampilkan menu utama
+    // Displays the main menu
     if (data === 'start') {
       showMainMenu(chatId);
       return;
     }
 
-    // Menampilkan bantuan
+    // Display help
     if (data === 'help') {
       bot.sendMessage(chatId, 'Aksi yang tersedia:\n- Tambah Dompet: Tambah dompet baru\n- Daftar Dompet: Lihat semua dompet\n- Jalankan Transaksi: Eksekusi transaksi\n- Bantuan: Tampilkan pesan ini', {
         reply_markup: {
