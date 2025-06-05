@@ -448,3 +448,37 @@ function mainTelegram() {
     }
     showMainMenu(chatId);
   });
+
+// Handle buttons
+  bot.on('callback_query', async (query) => {
+    const chatId = query.message.chat.id.toString();
+    if (chatId !== allowedChatId) {
+      bot.sendMessage(chatId, 'Akses tidak diizinkan.');
+      bot.answerCallbackQuery(query.id);
+      return;
+    }
+
+    const data = query.data;
+    bot.answerCallbackQuery(query.id);
+
+    // Kembali ke menu utama
+    if (data === 'home') {
+      showMainMenu(chatId, 'Kembali ke menu utama.');
+      return;
+    }
+
+    // Menampilkan menu utama
+    if (data === 'start') {
+      showMainMenu(chatId);
+      return;
+    }
+
+    // Menampilkan bantuan
+    if (data === 'help') {
+      bot.sendMessage(chatId, 'Aksi yang tersedia:\n- Tambah Dompet: Tambah dompet baru\n- Daftar Dompet: Lihat semua dompet\n- Jalankan Transaksi: Eksekusi transaksi\n- Bantuan: Tampilkan pesan ini', {
+        reply_markup: {
+          inline_keyboard: [backToHomeButton],
+        },
+      });
+      return;
+    }
