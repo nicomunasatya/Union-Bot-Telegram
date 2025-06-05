@@ -453,7 +453,7 @@ function mainTelegram() {
   bot.on('callback_query', async (query) => {
     const chatId = query.message.chat.id.toString();
     if (chatId !== allowedChatId) {
-      bot.sendMessage(chatId, 'Akses tidak diizinkan.');
+      bot.sendMessage(chatId, 'Access not permitted.');
       bot.answerCallbackQuery(query.id);
       return;
     }
@@ -463,7 +463,7 @@ function mainTelegram() {
 
     // Back to main menu
     if (data === 'home') {
-      showMainMenu(chatId, 'Kembali ke menu utama.');
+      showMainMenu(chatId, 'Back to main menu.');
       return;
     }
 
@@ -487,6 +487,26 @@ function mainTelegram() {
     if (data === 'add_wallet') {
       userState[chatId] = { step: 'add_wallet_input' };
       bot.sendMessage(chatId, 'Harap masukkan detail dompet dengan format:\nnama: <nama_dompet>\nkunci_pribadi: <kunci_pribadi>\nalamat_babylon: <alamat_babylon> (opsional)', {
+        reply_markup: {
+          inline_keyboard: [backToHomeButton],
+        },
+      });
+      return;
+    }
+
+    // Wallet list
+    if (data === 'list_wallets') {
+      const wallets = loadWallets();
+      if (wallets.length === 0) {
+        bot.sendMessage(chatId, 'Tidak ada dompet ditemukan.', {
+          reply_markup: {
+            inline_keyboard: [backToHomeButton],
+          },
+        });
+        return;
+      }
+      const walletList = wallets.map(w => `Nama: ${w.name}\nAlamat: ${new ethers.Wallet(w.privatekey).address}\nAlamat Babylon: ${w.babylonAddress || 'Tidak Ada'}`).join('\n\n');
+      bot.sendMessage(chatId, `Dompet:\n\n${walletList}`, {
         reply_markup: {
           inline_keyboard: [backToHomeButton],
         },
