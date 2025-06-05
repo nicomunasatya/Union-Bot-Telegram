@@ -498,14 +498,14 @@ function mainTelegram() {
     if (data === 'list_wallets') {
       const wallets = loadWallets();
       if (wallets.length === 0) {
-        bot.sendMessage(chatId, 'Tidak ada dompet ditemukan.', {
+        bot.sendMessage(chatId, 'No wallet found.', {
           reply_markup: {
             inline_keyboard: [backToHomeButton],
           },
         });
         return;
       }
-      const walletList = wallets.map(w => `Nama: ${w.name}\nAlamat: ${new ethers.Wallet(w.privatekey).address}\nAlamat Babylon: ${w.babylonAddress || 'Tidak Ada'}`).join('\n\n');
+      const walletList = wallets.map(w => `Name: ${w.name}\nAddress: ${new ethers.Wallet(w.privatekey).address}\nBabylon Address: ${w.babylonAddress || 'Nothing'}`).join('\n\n');
       bot.sendMessage(chatId, `Dompet:\n\n${walletList}`, {
         reply_markup: {
           inline_keyboard: [backToHomeButton],
