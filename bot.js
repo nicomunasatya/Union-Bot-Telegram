@@ -475,7 +475,7 @@ function mainTelegram() {
 
     // Display help
     if (data === 'help') {
-      bot.sendMessage(chatId, 'Aksi yang tersedia:\n- Tambah Dompet: Tambah dompet baru\n- Daftar Dompet: Lihat semua dompet\n- Jalankan Transaksi: Eksekusi transaksi\n- Bantuan: Tampilkan pesan ini', {
+      bot.sendMessage(chatId, 'Available actions:\n- Add Wallet: Add a new wallet\n- List Wallet: View all wallets\n- Execute Transaction: Execute a transaction\n- Help: Show this message', {
         reply_markup: {
           inline_keyboard: [backToHomeButton],
         },
@@ -486,7 +486,7 @@ function mainTelegram() {
     // Add wallet
     if (data === 'add_wallet') {
       userState[chatId] = { step: 'add_wallet_input' };
-      bot.sendMessage(chatId, 'Harap masukkan detail dompet dengan format:\nnama: <nama_dompet>\nkunci_pribadi: <kunci_pribadi>\nalamat_babylon: <alamat_babylon> (opsional)', {
+      bot.sendMessage(chatId, 'Please enter wallet details in the format:\nname: <wallet_name>\nprivate_key: <private_key>\babylon_address: <babylon_address> (optional)', {
         reply_markup: {
           inline_keyboard: [backToHomeButton],
         },
