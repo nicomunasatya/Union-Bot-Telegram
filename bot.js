@@ -513,3 +513,210 @@ function mainTelegram() {
       });
       return;
     }
+
+// Menjalankan transaksi - memilih tujuan
+    if (data === 'run_transactions') {
+      userState[chatId] = { step: 'select_destination' };
+      bot.sendMessage(chatId, 'Pilih tujuan:', {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'Sepolia - Holesky', callback_data: 'destination_holesky' }],
+            [{ text: 'Sepolia - Babylon', callback_data: 'destination_babylon' }],
+            [{ text: 'Acak (Holesky dan Babylon)', callback_data: 'destination_random' }],
+            backToHomeButton,
+          ],
+        },
+      });
+      return;
+    }
+
+    // Memilih tujuan
+    if (data.startsWith('destination_')) {
+      const destination = data.split('_')[1];
+      userState[chatId] = { step: 'enter_transactions', destination };
+      bot.sendMessage(chatId, 'Masukkan jumlah transaksi per dompet:', {
+        reply_markup: {
+          inline_keyboard: [backToHomeButton],
+        },
+      });
+      return;
+    }
+  });
+
+  // Menangani input teks
+  bot.on('message', async (msg) => {
+    const chatId = msg.chat.id.toString();
+    if (chatId !== allowedChatId) {
+      bot.sendMessage(chatId, 'Akses tidak diizinkan.');
+      return;
+    }
+
+    // Jika pesan adalah perintah (misalnya /start), abaikan karena sudah ditangani
+    if (msg.text && msg.text.startsWith('/')) {
+      return;
+    }
+
+    // Memeriksa status pengguna
+    if (!userState[chatId]) {
+      showMainMenu(chatId, 'Harap gunakan tombol untuk berinteraksi.');
+      return;
+    }
+
+    const state = userState[chatId];
+
+    // Menambah dompet
+    if (state.step === 'add_wallet_input') {
+      try {
+        const lines = msg.text.split('\n').map(line => line.trim());
+        const wallet = {};
+        lines.forEach(line => {
+          const [key, value] = line.split(':').map(s => s.trim());
+          wallet[key] = value;
+        });
+
+        if (!wallet.nama || !wallet.kunci_pribadi) {
+          bot.sendMessage(chatId, 'Format tidak valid. Harap masukkan nama dan kunci_pribadi.', {
+            reply_markup: {
+              inline_keyboard: [backToHomeButton],
+            },
+          });
+          return;
+        }
+        if (!wallet.kunci_pribadi.startsWith('0x') || !/^(0x)[0-9a-fA-F]{64}$/.test(wallet.kunci_pribadi)) {
+          bot.sendMessage(chatId, 'Kunci pribadi tidak valid. Harus berupa string heksadesimal 64 karakter yang dimulai dengan 0x.', {
+            reply_markup: {
+              inline_keyboard: [backToHomeButton],
+            },
+          });
+          return;
+        }
+
+        const wallets = loadWallets();
+        wallets.push({
+          name: wallet.nama,
+          privatekey: wallet.kunci_pribadi,
+          babylonAddress: wallet.alamat_babylon || ''
+        });
+        saveWallets(wallets);
+        bot.sendMessage(chatId, `Dompet ${wallet.nama} berhasil ditambahkan!`, {
+          reply_markup: {
+            inline_keyboard: [backToHomeButton],
+          },
+        });
+        delete userState[chatId]; // Selesai operasi
+      } catch (err) {
+        bot.sendMessage(chatId, `Gagal menambahkan dompet: ${err.message}`, {
+          reply_markup: {
+            inline_keyboard: [backToHomeButton],
+          },
+        });
+      }
+      return;
+    }
+
+    // Memasukkan jumlah transaksi
+    if (state.step === 'enter_transactions') {
+      const maxTransaction = parseInt(msg.text.trim());
+      if (isNaN(maxTransaction) || maxTransaction <= 0) {
+        bot.sendMessage(chatId, 'Angka tidak valid. Harap masukkan angka positif.', {
+          reply_markup: {
+            inline_keyboard: [backToHomeButton],
+          },
+        });
+        return;
+      }
+
+      const destination = state.destination;
+      const wallets = loadWallets();
+      if (wallets.length === 0) {
+        bot.sendMessage(chatId, 'Tidak ada dompet ditemukan. Harap tambahkan dompet terlebih dahulu.', {
+          reply_markup: {
+            inline_keyboard: [backToHomeButton],
+          },
+        });
+        delete userState[chatId];
+        return;
+      }
+
+      bot.sendMessage(chatId, `Memulai ${maxTransaction} transaksi ke ${destination}...`, {
+        reply_markup: {
+          inline_keyboard: [backToHomeButton],
+        },
+      });
+
+      for (const walletInfo of wallets) {
+        if (!walletInfo.privatekey) {
+          bot.sendMessage(chatId, `Melewati dompet '${walletInfo.name}': Kunci pribadi tidak ada.`, {
+            reply_markup: {
+              inline_keyboard: [backToHomeButton],
+            },
+          });
+          continue;
+        }
+        if (!walletInfo.privatekey.startsWith('0x')) {
+          bot.sendMessage(chatId, `Melewati dompet '${walletInfo.name}': Kunci pribadi harus dimulai dengan '0x'.`, {
+            reply_markup: {
+              inline_keyboard: [backToHomeButton],
+            },
+          });
+          continue;
+        }
+        if (!/^(0x)[0-9a-fA-F]{64}$/.test(walletInfo.privatekey)) {
+          bot.sendMessage(chatId, `Melewati dompet '${walletInfo.name}': Kunci pribadi bukan string heksadesimal 64 karakter yang valid.`, {
+            reply_markup: {
+              inline_keyboard: [backToHomeButton],
+            },
+          });
+          continue;
+        }
+
+        if (destination === 'holesky') {
+          await sendFromWallet(walletInfo, maxTransaction, 'holesky', bot, chatId);
+        } else if (destination === 'babylon') {
+          await sendFromWallet(walletInfo, maxTransaction, 'babylon', bot, chatId);
+        } else if (destination === 'random') {
+          const destinations = ['holesky', 'babylon'].filter(dest => dest !== 'babylon' || walletInfo.babylonAddress);
+          if (destinations.length === 0) {
+            bot.sendMessage(chatId, `Melewati dompet '${walletInfo.name}': Tidak ada tujuan valid (alamat Babylon tidak ada).`, {
+              reply_markup: {
+                inline_keyboard: [backToHomeButton],
+              },
+            });
+            continue;
+          }
+          for (let i = 0; i < maxTransaction; i++) {
+            const randomDest = destinations[Math.floor(Math.random() * destinations.length)];
+            await sendFromWallet(walletInfo, 1, randomDest, bot, chatId);
+          }
+        }
+      }
+
+      bot.sendMessage(chatId, 'Proses transaksi selesai.', {
+        reply_markup: {
+          inline_keyboard: [backToHomeButton],
+        },
+      });
+      delete userState[chatId]; // Selesai operasi
+    }
+  });
+
+  logger.info('Bot Telegram dimulai dengan keyboard inline.');
+}
+
+// Fungsi utama
+async function main() {
+  try {
+    if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
+      mainTelegram();
+    } else {
+      mainConsole();
+    }
+  } catch (err) {
+    logger.error(`Kesalahan utama: ${err.message}`);
+    rl.close();
+    process.exit(1);
+  }
+}
+
+main();
+        
